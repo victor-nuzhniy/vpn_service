@@ -1,9 +1,11 @@
 """Forms for vpn_app."""
+from django import forms
 from django.contrib.auth.forms import (
     AuthenticationForm,
     PasswordChangeForm,
     UserCreationForm,
 )
+from django.contrib.auth.models import User
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -50,5 +52,29 @@ class CustomPasswordChangeForm(PasswordChangeForm):
             "class"
         ] = "custom-input custom-input-height"
         self.fields["new_password2"].widget.attrs[
+            "class"
+        ] = "custom-input custom-input-height"
+
+
+class UserAccountForm(forms.ModelForm):
+    """Form for User model."""
+
+    class Meta:
+        """Class Meta for UserAccountForm."""
+
+        model = User
+        fields = ("username", "email", "first_name", "last_name")
+
+    def __init__(self, *args, **kwargs) -> None:
+        """Rewrite fields class."""
+        super().__init__(*args, **kwargs)
+        self.fields["username"].widget.attrs[
+            "class"
+        ] = "custom-input custom-input-height"
+        self.fields["email"].widget.attrs["class"] = "custom-input custom-input-height"
+        self.fields["first_name"].widget.attrs[
+            "class"
+        ] = "custom-input custom-input-height"
+        self.fields["last_name"].widget.attrs[
             "class"
         ] = "custom-input custom-input-height"
