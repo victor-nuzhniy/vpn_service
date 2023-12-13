@@ -3,6 +3,7 @@ from django.contrib.auth.views import LogoutView
 from django.urls import path
 
 from vpn_app.views import (
+    AccountView,
     CreateSiteLinkView,
     CustomLoginView,
     CustomPasswordChangeView,
@@ -33,4 +34,5 @@ urlpatterns = [
         DeleteSiteLinkView.as_view(),
         name="delete_site_link",
     ),
+    path("account/<int:pk>/", AccountView.as_view(), name="account"),
 ]

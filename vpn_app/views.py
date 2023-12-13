@@ -14,6 +14,7 @@ from vpn_app.forms import (
     CustomAuthForm,
     CustomPasswordChangeForm,
     CustomUserCreationForm,
+    UserAccountForm,
     VpnSiteCreateForm,
 )
 from vpn_app.mixins import ChangeSuccessURLMixin, CustomUserPassesTestMixin
@@ -102,6 +103,23 @@ class DeleteSiteLinkView(CustomUserPassesTestMixin, ChangeSuccessURLMixin, Delet
     def get_queryset(self):
         """Return queryset using current user."""
         return VpnSite.objects.filter(owner=self.request.user)
+
+
+class AccountView(CustomUserPassesTestMixin, ChangeSuccessURLMixin, UpdateView):
+    """Update user information."""
+
+    model = User
+    form_class = UserAccountForm
+    template_name = "vpn_app/account.html"
+    extra_context = {"title": "Personal info"}
+    success_url = reverse_lazy("vpn:sign_up")
+
+    def get_context_data(self, **kwargs) -> Dict:
+        """Get context data."""
+        context = super().get_context_data(**kwargs)
+        user: User = self.request.user
+        context["vpn_sites"] = VpnSite.objects.filter(owner=user)
+        return context
 
 
 class VpnView(View):
