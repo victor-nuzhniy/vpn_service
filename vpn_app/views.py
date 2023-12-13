@@ -1,12 +1,13 @@
 """Views for vpn_app."""
 from django.contrib.auth import login
 from django.contrib.auth.models import User
+from django.contrib.auth.views import LoginView
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import FormView, TemplateView
 
-from vpn_app.forms import CustomUserCreationForm
+from vpn_app.forms import CustomAuthForm, CustomUserCreationForm
 from vpn_app.mixins import ChangeSuccessURLMixin
 
 
@@ -30,6 +31,16 @@ class RegisterView(ChangeSuccessURLMixin, FormView):
         user: User = form.save()
         login(self.request, user)
         return super().form_valid(form)
+
+
+class CustomLoginView(ChangeSuccessURLMixin, LoginView):
+    """Login view."""
+
+    extra_context = {"title": "Sign in"}
+    next_page = "vpn:sign_up"
+    redirect_authenticated_user = True
+    template_name = "vpn_app/auth/login.html"
+    form_class = CustomAuthForm
 
 
 class VpnView(View):
