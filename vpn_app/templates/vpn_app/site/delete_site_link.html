@@ -1,0 +1,15 @@
+{% extends 'vpn_app/base.html' %}
+{% load static %}
+{% block content %}
+    <div class="w-100 d-flex flex-column align-items-center">
+        <div class="fs-2">{{ title}}</div>
+        <div class="fs-6">Are you sure you want to delete?</div>
+        <form method="post" class="d-flex flex-column align-items-center">
+            <div>
+                {% csrf_token %}
+                {{ form.as_p }}
+            </div>
+            <button type="submit" class="btn btn-primary">Delete</button>
+        </form>
+    </div>
+{% endblock content %}
