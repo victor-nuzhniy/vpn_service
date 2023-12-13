@@ -84,7 +84,7 @@ class UpdateSiteLinkView(CustomUserPassesTestMixin, ChangeSuccessURLMixin, Updat
     template_name = "vpn_app/site/update_site_link.html"
     extra_context = {"title": "Update site link"}
     success_url = reverse_lazy("vpn:sign_up")
-    slug_field = "url"
+    slug_field = "domain"
 
     def get_queryset(self):
         """Return queryset using current user."""
