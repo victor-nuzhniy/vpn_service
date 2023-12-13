@@ -89,10 +89,10 @@ class VpnSiteCreateForm(forms.ModelForm):
         """Rewrite fields styling."""
         super().__init__(*args, **kwargs)
         self.fields["name"].widget.attrs["class"] = "custom-input custom-input-height"
-        self.fields["url"].widget.attrs["class"] = "custom-input custom-input-height"
+        self.fields["domain"].widget.attrs["class"] = "custom-input custom-input-height"
 
     class Meta:
         """Class Meta for PersonalSiteCreateForm."""
 
         model = VpnSite
-        fields = ("name", "url")
+        fields = ("name", "domain")

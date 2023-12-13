@@ -7,7 +7,7 @@ class VpnSite(models.Model):
     """Model for site data."""
 
     name = models.CharField(max_length=100, verbose_name="Site name")
-    url = models.URLField(verbose_name="Site url")
+    domain = models.URLField(verbose_name="Site domain")
     owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Site owner")
     used_links_number = models.BigIntegerField(
         default=0, verbose_name="Used links number"

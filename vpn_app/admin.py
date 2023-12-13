@@ -11,12 +11,12 @@ class VpnSiteAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "name",
-        "url",
+        "domain",
         "used_links_number",
         "sended_volume",
         "loaded_volume",
     )
-    list_display_links = ("id", "name", "url")
+    list_display_links = ("id", "name", "domain")
 
 
 admin.site.register(VpnSite, VpnSiteAdmin)
