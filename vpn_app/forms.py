@@ -7,6 +7,8 @@ from django.contrib.auth.forms import (
 )
 from django.contrib.auth.models import User
 
+from vpn_app.models import VpnSite
+
 
 class CustomUserCreationForm(UserCreationForm):
     """Customize UserCreationForm fields."""
@@ -78,3 +80,19 @@ class UserAccountForm(forms.ModelForm):
         self.fields["last_name"].widget.attrs[
             "class"
         ] = "custom-input custom-input-height"
+
+
+class VpnSiteCreateForm(forms.ModelForm):
+    """Form for PersonalSite model instance creation."""
+
+    def __init__(self, *args, **kwargs):
+        """Rewrite fields styling."""
+        super().__init__(*args, **kwargs)
+        self.fields["name"].widget.attrs["class"] = "custom-input custom-input-height"
+        self.fields["url"].widget.attrs["class"] = "custom-input custom-input-height"
+
+    class Meta:
+        """Class Meta for PersonalSiteCreateForm."""
+
+        model = VpnSite
+        fields = ("name", "url")
