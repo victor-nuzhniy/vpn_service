@@ -1,0 +1,67 @@
+{% extends 'vpn_app/base.html' %}
+{% load static %}
+{% block content %}
+    <div class="w-100 p-2 d-flex flex-column align-items-center">
+        <div class="w-100 d-flex flex-column align-items-center">
+            <div class="fs-2">{{ title }}</div>
+            <form method="post" class="w-100 d-flex flex-column align-items-center" style="max-width: 400px">
+                <div class="w-100">
+                    {% csrf_token %}
+                {% if form.error %}
+                    <div>{{ form.error }}</div>
+                {% endif %}
+                {% for f in form %}
+                    <div class="my-2">{{ f.label }}</div>
+                    <div class="w-100">{{ f }}</div>
+                    {% if f.errors %}
+                        <div>{{ f.errors }}</div>
+                    {% endif %}
+                {% endfor %}
+                </div>
+                <button type="submit" class="btn btn-primary mt-4">Submit changes</button>
+            </form>
+            <div class="w-100 d-flex flex-row">
+                <a class="m-2" href="{% url 'vpn:password_change' %}">
+                    <button class="btn btn-warning">Change password</button>
+                </a>
+                <a class="m-2" href="{% url 'vpn:create_site_link' %}">
+                    <button class="btn btn-warning">Create site vpn link</button>
+                </a>
+            </div>
+        </div>
+        <div class="w-100 d-flex flex-column align-items-center">
+            <div class="fs-2 m-2">Sites and links</div>
+                <div class="w-100">
+                    <a href="{% url 'vpn:create_site_link' %}">
+                        <button class="btn btn-warning">Create site vpn link</button>
+                    </a>
+                    <div class="w-100 text-center fs-4">Already created sites</div>
+                    <table class="table table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th scope="col">N</th>
+                                <th scope="col">Site name</th>
+                                <th scope="col">Site domain</th>
+                                <th scope="col">Update</th>
+                                <th scope="col">Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vpn_site in vpn_sites %}
+                                {% with forloop.counter as index %}
+                                    <tr>
+                                        <th scope="row">{{ index }}</th>
+                                        <th>{{ vpn_site.name }}</th>
+                                        <th>{{ vpn_site.domain }}</th>
+                                        <th><a href="{% url 'vpn:update_site_link' user.id vpn_site.domain %}">Click</a></th>
+                                        <th><a href="{% url 'vpn:delete_site_link' user.id vpn_site.domain %}">Click</a></th>
+                                    </tr>
+                                {% endwith %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
