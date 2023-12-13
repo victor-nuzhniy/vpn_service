@@ -6,8 +6,10 @@ from vpn_app.views import (
     CreateSiteLinkView,
     CustomLoginView,
     CustomPasswordChangeView,
+    DeleteSiteLinkView,
     IndexView,
     RegisterView,
+    UpdateSiteLinkView,
 )
 
 app_name = "vpn"
@@ -21,4 +23,14 @@ urlpatterns = [
     ),
     path("logout/", LogoutView.as_view(next_page="vpn:index"), name="logout"),
     path("create-site-link/", CreateSiteLinkView.as_view(), name="create_site_link"),
+    path(
+        "update-site-link/<int:owner_id>/<str:slug>/",
+        UpdateSiteLinkView.as_view(),
+        name="update_site_link",
+    ),
+    path(
+        "delete-site-link/<int:owner_id>/<str:slug>/",
+        DeleteSiteLinkView.as_view(),
+        name="delete_site_link",
+    ),
 ]

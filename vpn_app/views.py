@@ -8,7 +8,7 @@ from django.contrib.auth.views import LoginView, PasswordChangeView
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import FormView, TemplateView
+from django.views.generic import DeleteView, FormView, TemplateView, UpdateView
 
 from vpn_app.forms import (
     CustomAuthForm,
@@ -16,7 +16,7 @@ from vpn_app.forms import (
     CustomUserCreationForm,
     VpnSiteCreateForm,
 )
-from vpn_app.mixins import ChangeSuccessURLMixin
+from vpn_app.mixins import ChangeSuccessURLMixin, CustomUserPassesTestMixin
 from vpn_app.models import VpnSite
 
 
@@ -74,6 +74,34 @@ class CreateSiteLinkView(LoginRequiredMixin, ChangeSuccessURLMixin, FormView):
         data: Dict = form.cleaned_data
         VpnSite(**data, owner=self.request.user).save()
         return super().form_valid(form)
+
+
+class UpdateSiteLinkView(CustomUserPassesTestMixin, ChangeSuccessURLMixin, UpdateView):
+    """Update site view."""
+
+    form_class = VpnSiteCreateForm
+    template_name = "vpn_app/site/update_site_link.html"
+    extra_context = {"title": "Update site link"}
+    success_url = reverse_lazy("vpn:sign_up")
+    slug_field = "url"
+
+    def get_queryset(self):
+        """Return queryset using current user."""
+        return VpnSite.objects.filter(owner=self.request.user)
+
+
+class DeleteSiteLinkView(CustomUserPassesTestMixin, ChangeSuccessURLMixin, DeleteView):
+    """Delete PersonalSite model instance."""
+
+    model = VpnSite
+    template_name = "vpn_app/site/delete_site_link.html"
+    extra_context = {"title": "Delete site link"}
+    success_url = reverse_lazy("vpn:sign_up")
+    slug_field = "domain"
+
+    def get_queryset(self):
+        """Return queryset using current user."""
+        return VpnSite.objects.filter(owner=self.request.user)
 
 
 class VpnView(View):
