@@ -1,0 +1,23 @@
+{% load static %}
+
+<div
+        class="w-100 p-2 bg-white d-flex flex-row justify-content-around align-items-center"
+        style="height: 70px"
+>
+    <div class="fs-3 fw-bold text-danger">VPN</div>
+    {% if user.is_anonymous %}
+        <div class="d-flex flex-row">
+            <a class="m-2 text-danger" href="{% url 'vpn:sign_up' %}">Sign up</a>
+            <a class="m-2 text-danger" href="{% url 'vpn:sign_in' %}">Sign in</a>
+        </div>
+    {% else %}
+        <div class="d-flex flex-row">
+            <a class="m-2 text-danger" href="{% url 'vpn:logout' %}">Logout</a>
+            <a class="m-2 text-danger" id="aa" href="{% url 'vpn:account' user.id %}">Account</a>
+        </div>
+        <div class="d-flex flex-row">
+            <a class="m-2 text-danger" id="enableVPN" href="">Enable VPN</a>
+            <a class="m-2 text-danger" id="disableVPN" href="">Disable VPN</a>
+        </div>
+    {% endif %}
+</div>
