@@ -3,6 +3,7 @@ from django.contrib.auth.views import LogoutView
 from django.urls import path
 
 from vpn_app.views import (
+    CreateSiteLinkView,
     CustomLoginView,
     CustomPasswordChangeView,
     IndexView,
@@ -19,4 +20,5 @@ urlpatterns = [
         "password-change/", CustomPasswordChangeView.as_view(), name="password_change"
     ),
     path("logout/", LogoutView.as_view(next_page="vpn:index"), name="logout"),
+    path("create-site-link/", CreateSiteLinkView.as_view(), name="create_site_link"),
 ]
