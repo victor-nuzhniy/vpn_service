@@ -42,6 +42,9 @@
                                 <th scope="col">N</th>
                                 <th scope="col">Site name</th>
                                 <th scope="col">Site domain</th>
+                                <th scope="col">Transition</th>
+                                <th scope="col">Sended</th>
+                                <th scope="col">Loaded</th>
                                 <th scope="col">Update</th>
                                 <th scope="col">Delete</th>
                             </tr>
@@ -51,8 +54,11 @@
                                 {% with forloop.counter as index %}
                                     <tr>
                                         <th scope="row">{{ index }}</th>
-                                        <th>{{ vpn_site.name }}</th>
-                                        <th>{{ vpn_site.domain }}</th>
+                                        <th><a href="/localhost/{{ vpn_site.domain }}/">{{ vpn_site.name }}</a></th>
+                                        <th><a href="/localhost/{{ vpn_site.domain }}/">{{ vpn_site.domain }}</a></th>
+                                        <th>{{ vpn_site.used_links_number }}</th>
+                                        <th>{{ vpn_site.sended_volume }}</th>
+                                        <th>{{ vpn_site.loaded_volume }}</th>
                                         <th><a href="{% url 'vpn:update_site_link' user.id vpn_site.domain %}">Click</a></th>
                                         <th><a href="{% url 'vpn:delete_site_link' user.id vpn_site.domain %}">Click</a></th>
                                     </tr>
