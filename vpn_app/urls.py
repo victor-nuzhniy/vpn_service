@@ -1,6 +1,6 @@
 """Urls for vpn_app."""
 from django.contrib.auth.views import LogoutView
-from django.urls import path
+from django.urls import path, re_path
 
 from vpn_app.views import (
     AccountView,
@@ -11,6 +11,7 @@ from vpn_app.views import (
     IndexView,
     RegisterView,
     UpdateSiteLinkView,
+    VpnView,
 )
 
 app_name = "vpn"
@@ -35,4 +36,5 @@ urlpatterns = [
         name="delete_site_link",
     ),
     path("account/<int:pk>/", AccountView.as_view(), name="account"),
+    re_path(r"^localhost/(?P<path>([^/]+/?)*)$", VpnView.as_view(), name="vpn_view"),
 ]
