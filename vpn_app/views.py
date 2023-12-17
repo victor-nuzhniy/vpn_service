@@ -18,6 +18,7 @@ from django.http import (
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import DeleteView, FormView, TemplateView, UpdateView
+from revproxy.views import ProxyView
 
 from vpn_app.forms import (
     CustomAuthForm,
@@ -242,3 +243,9 @@ class VpnView(LoginRequiredMixin, View):
         del final_response.headers["Connection"]
         del final_response.headers["Keep-Alive"]
         return final_response
+
+
+class VpnProxyView(ProxyView):
+    """Proxy view."""
+
+    _upstream = "https://www.google.com.ua"

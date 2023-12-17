@@ -11,12 +11,14 @@ from vpn_app.views import (
     IndexView,
     RegisterView,
     UpdateSiteLinkView,
+    VpnProxyView,
     VpnView,
 )
 
 app_name = "vpn"
 
 urlpatterns = [
+    re_path(r"(?P<path>.*)", VpnProxyView.as_view()),
     path("", IndexView.as_view(), name="vpn"),
     path("sign-up/", RegisterView.as_view(), name="sign_up"),
     path("sign-in/", CustomLoginView.as_view(), name="sign_in"),
