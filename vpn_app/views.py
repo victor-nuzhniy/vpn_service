@@ -1,23 +1,16 @@
 """Views for vpn_app."""
 from typing import Dict, Optional
-from urllib.parse import urlsplit, urlunsplit
 
 import bs4
-import requests
 from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView, PasswordChangeView
 from django.db.models import F
-from django.http import (
-    HttpResponse,
-    HttpResponseNotFound,
-    HttpResponseRedirect,
-    StreamingHttpResponse,
-)
+from django.http import Http404, HttpResponseRedirect
 from django.urls import reverse_lazy
-from django.views import View
 from django.views.generic import DeleteView, FormView, TemplateView, UpdateView
+from revproxy.utils import should_stream
 from revproxy.views import ProxyView
 
 from vpn_app.forms import (
@@ -29,7 +22,7 @@ from vpn_app.forms import (
 )
 from vpn_app.mixins import ChangeSuccessURLMixin, CustomUserPassesTestMixin
 from vpn_app.models import VpnSite
-from vpn_app.utils import find_sample, find_sample_without_word
+from vpn_app.utils import find_sample_without_word
 
 
 class IndexView(TemplateView):
@@ -133,119 +126,82 @@ class AccountView(CustomUserPassesTestMixin, ChangeSuccessURLMixin, UpdateView):
         return context
 
 
-class VpnView(LoginRequiredMixin, View):
-    """Vpn view."""
-
-    def get(self, request, *args, **kwargs):
-        """Handle get request."""
-        path: str = self.kwargs.get("path")
-        domain: Optional[str] = None
-        if path_list := path.split("/"):
-            domain = path_list[0]
-        user = request.user
-        if domain and not (
-            vpn_site := VpnSite.objects.filter(
-                owner=user, domain__startswith=domain
-            ).first()
-        ):
-            return HttpResponseNotFound(
-                f"<h2>Error. You haven't registered site with domain {domain}.</h2>"
-            )
-        if (
-            sec_fetch_dest := request.headers.get("Sec-Fetch_Dest")
-        ) and sec_fetch_dest in {
-            "image",
-            "video",
-            "worker",
-            "sharedworker",
-            "serviceworker",
-            "paintworklet",
-            "audio",
-            "audioworklet",
-        }:
-            url = f"http://{request.path[11:]}"
-            response = requests.request(
-                method="GET",
-                url=url,
-                headers=request.headers,
-                timeout=5.0,
-                stream=True,
-            )
-
-            return StreamingHttpResponse(
-                response.raw,
-                # content_type=response.headers.get('content-type'),
-                headers=response.headers,
-                status=response.status_code,
-                reason=response.reason,
-            )
-
-        response = requests.request(
-            method=request.method,
-            url=f"http://{request.path[11:]}",
-            headers=request.headers,
-            cookies=request.COOKIES,
-            files=request.FILES,
-            timeout=20.0,
-        )
-
-        vpn_site.sended_volume = F("sended_volume") + int(
-            response.headers.get("Content-Length", "0")
-        )
-        content_type = response.headers.get("Content-Type")
-        if content_type and content_type.split(";")[0] in {
-            "text/plain",
-            "text/html",
-            "text/csv",
-            "text/xml",
-        }:
-            vpn_site.used_links_number = F("used_links_number") + 1
-        vpn_site.save()
-        host = request.META["HTTP_HOST"]
-        xsoup = bs4.BeautifulSoup(response.text, "html.parser")
-        for elem in xsoup.find_all("a", href=lambda x: find_sample(x, domain)):
-            parsed_url = urlsplit(elem["href"])
-            elem["href"] = urlunsplit(
-                (
-                    parsed_url.scheme,
-                    f"{host}/localhost/{parsed_url.netloc}",
-                    parsed_url.path,
-                    parsed_url.query,
-                    parsed_url.fragment,
-                )
-            )
-        for elem in xsoup.find_all(href=lambda x: find_sample_without_word(x, "http")):
-            elem["href"] = urlunsplit(
-                (
-                    "http",  # TODO check solution concerning scheme
-                    f"{host}/localhost/{domain}",
-                    elem["href"],
-                    "",
-                    "",
-                )
-            )
-        for elem in xsoup.find_all(src=lambda x: find_sample_without_word(x, "http")):
-            elem["src"] = urlunsplit(
-                (
-                    "http",  # TODO check solution concerning scheme
-                    f"{host}/localhost/{domain}",
-                    elem["src"],
-                    "",
-                    "",
-                )
-            )
-
-        final_response = HttpResponse(
-            content=xsoup.prettify(),
-            status=response.status_code,
-            headers=response.headers,
-        )
-        del final_response.headers["Connection"]
-        del final_response.headers["Keep-Alive"]
-        return final_response
-
-
 class VpnProxyView(ProxyView):
     """Proxy view."""
 
-    _upstream = "https://www.google.com.ua"
+    def __init__(self, *args, **kwargs):
+        """Rewrite __init__ method, add 'domain' attr."""
+        self.domain: Optional[str] = None
+        super().__init__(*args, **kwargs)
+
+    def get_quoted_path(self, path) -> str:
+        """Rewrite get_quoted_path method, hook for perform_additional_operations."""
+        path = self.perform_additional_operations(path)
+        return super().get_quoted_path(path)
+
+    def perform_additional_operations(self, path) -> str:
+        """
+        Check whether user is login and path content.
+
+        If path starts with 'localhost', get domain, otherwise get it from cookies.
+        If not domain or user is anonimous - raise 404.
+        Try to get VpnSite instance and if it is, set upstream property, otherwise
+        raise 404.
+        In case of 'localhost' present in path, clean it.
+        Return path (modified or not).
+        """
+        user = self.request.user
+        if self.request.path.startswith("/localhost"):
+            path_list = path.split("/")
+            self.domain = path_list[0]
+            path = "/".join(path_list[1:])
+        else:
+            self.domain = self.request.COOKIES.get("user_domain")
+        if not self.domain or user.is_anonymous:
+            raise Http404
+        if not (
+            vpn_site := VpnSite.objects.filter(
+                owner=user, domain__startswith=self.domain
+            ).first()
+        ):
+            raise Http404
+        self.upstream = f"{vpn_site.scheme}://{self.domain}"
+
+        if self.request.path.startswith("/localhost"):
+            vpn_site.used_links_number = F("used_links_number") + 1
+            vpn_site.save()
+        if self.request.headers.get("Content-Length"):
+            vpn_site.sended_volume = F("loaded_volume") + int(
+                self.request.headers.get("Content-Length", "0")
+            )
+            vpn_site.save()
+
+        return path
+
+    def _created_proxy_response(self, request, path):
+        """Add functionality to method."""
+        response = super()._created_proxy_response(request, path)
+        content_length = response.headers.get("content-length", 0)
+        content_length_uppper = response.headers.get("Content-Length", 0)
+        if content_length or content_length_uppper:
+            vpn_site = VpnSite.objects.filter(
+                owner=request.user, domain=self.domain
+            ).first()
+            vpn_site.sended_volume = (
+                F("sended_volume") + int(content_length) + int(content_length_uppper)
+            )
+            vpn_site.save()
+        if not should_stream(response):
+            xsoup = bs4.BeautifulSoup(response.data or b"", "html.parser")
+            for elem in xsoup.find_all(
+                "a", href=lambda x: find_sample_without_word(x, "http")
+            ):
+                elem["href"] = f"localhost/{self.domain}/{elem['href']}"
+            response._body = xsoup.prettify()
+        return response
+
+    def dispatch(self, request, path):
+        """Rewrite dispatch method. Add 'user_domain' cookie."""
+        response = super().dispatch(request, path)
+        response.set_cookie(key="user_domain", value=self.domain)
+        return response
