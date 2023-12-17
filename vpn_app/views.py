@@ -6,7 +6,6 @@ from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView, PasswordChangeView
-from django.db.models import F
 from django.http import Http404, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic import DeleteView, FormView, TemplateView, UpdateView
@@ -22,7 +21,12 @@ from vpn_app.forms import (
 )
 from vpn_app.mixins import ChangeSuccessURLMixin, CustomUserPassesTestMixin
 from vpn_app.models import VpnSite
-from vpn_app.utils import find_sample_without_word
+from vpn_app.utils import (
+    add_links_number,
+    add_loaded_volume,
+    add_sended_volume,
+    find_sample_without_word,
+)
 
 
 class IndexView(TemplateView):
@@ -165,16 +169,13 @@ class VpnProxyView(ProxyView):
             ).first()
         ):
             raise Http404
+
         self.upstream = f"{vpn_site.scheme}://{self.domain}"
 
         if self.request.path.startswith("/localhost"):
-            vpn_site.used_links_number = F("used_links_number") + 1
-            vpn_site.save()
-        if self.request.headers.get("Content-Length"):
-            vpn_site.sended_volume = F("loaded_volume") + int(
-                self.request.headers.get("Content-Length", "0")
-            )
-            vpn_site.save()
+            add_links_number(vpn_site)
+        if volume := self.request.headers.get("Content-Length", 0):
+            add_loaded_volume(vpn_site, volume)
 
         return path
 
@@ -184,13 +185,9 @@ class VpnProxyView(ProxyView):
         content_length = response.headers.get("content-length", 0)
         content_length_uppper = response.headers.get("Content-Length", 0)
         if content_length or content_length_uppper:
-            vpn_site = VpnSite.objects.filter(
-                owner=request.user, domain=self.domain
-            ).first()
-            vpn_site.sended_volume = (
-                F("sended_volume") + int(content_length) + int(content_length_uppper)
+            add_sended_volume(
+                request.user, self.domain, content_length, content_length_uppper
             )
-            vpn_site.save()
         if not should_stream(response):
             xsoup = bs4.BeautifulSoup(response.data or b"", "html.parser")
             for elem in xsoup.find_all(
