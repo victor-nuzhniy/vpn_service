@@ -12,13 +12,11 @@ from vpn_app.views import (
     RegisterView,
     UpdateSiteLinkView,
     VpnProxyView,
-    VpnView,
 )
 
 app_name = "vpn"
 
 urlpatterns = [
-    re_path(r"(?P<path>.*)", VpnProxyView.as_view()),
     path("", IndexView.as_view(), name="vpn"),
     path("sign-up/", RegisterView.as_view(), name="sign_up"),
     path("sign-in/", CustomLoginView.as_view(), name="sign_in"),
@@ -38,5 +36,10 @@ urlpatterns = [
         name="delete_site_link",
     ),
     path("account/<int:pk>/", AccountView.as_view(), name="account"),
-    re_path(r"^localhost/(?P<path>([^/]+/?)*)$", VpnView.as_view(), name="vpn_view"),
+    re_path(
+        r"^localhost/(?P<path>([^/]+/?)*)$",
+        VpnProxyView.as_view(),
+        name="vpn_local_view",
+    ),
+    re_path(r"(?P<path>.*)", VpnProxyView.as_view(), name="vpn_view"),
 ]
