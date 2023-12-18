@@ -1,6 +1,15 @@
 version: '3.7'
 
 services:
+  postgres:
+    image: 'postgres:latest'
+    container_name: "postgres"
+    env_file:
+      - .env  # must define POSTGRES_USER, POSTGRES_PASSWORD and POSTGRES_DB
+    volumes:
+      - database_data:/var/lib/postgresql/data/  # persist data
+    ports:
+      - '8778:5432'  # required to access DB from host system
   web:
     build:
       context: .
@@ -13,6 +22,8 @@ services:
       - 8000
     env_file:
       - .env
+    depends_on:
+      - postgres
   redis:
     image: redis:5
     volumes:
@@ -21,5 +32,6 @@ services:
       - '6379:6379'
 
 volumes:
+  database_data:
   gunicorn_socket:
   redis_data:
