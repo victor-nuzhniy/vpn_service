@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "django.contrib.staticfiles",
     "vpn_app.apps.VpnAppConfig",
 ]
 
@@ -119,6 +120,9 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
+
+STATIC_URL = "admin_static_files/"
+STATIC_ROOT = os.path.join(BASE_DIR, "admin_static_files")
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
