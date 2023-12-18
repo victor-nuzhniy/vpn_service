@@ -1,6 +1,7 @@
 """Utilities for vpn_app."""
 from __future__ import annotations
 
+import os
 import re
 from typing import Any, Optional
 from urllib.request import urlopen
@@ -15,7 +16,10 @@ class Config:
         """Create new instance, if it's None, otherwise use earlier created one."""
         if not hasattr(cls, "instance"):
             cls.instance = super(Config, cls).__new__(cls, *args, **kwargs)
-            cls.instance.__dict__["public_ip"] = cls.get_public_ip()
+            if public_ip := str(os.getenv("HOST")):
+                cls.instance.__dict__["public_ip"] = public_ip
+            else:
+                cls.instance.__dict__["public_ip"] = cls.get_public_ip()
         return cls.instance
 
     def get_var(self, name: str) -> Any:
@@ -33,6 +37,6 @@ def find_sample(sample, word) -> bool:
     return sample and re.compile(word).search(sample)
 
 
-def find_sample_without_word(sample, word) -> bool:
+def find_sample_without_word(sample, *words) -> bool:
     """Define if sample satisfy the case."""
-    return sample and not re.compile(word).search(sample)
+    return sample and all([not re.compile(word).search(sample) for word in words])
