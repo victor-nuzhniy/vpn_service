@@ -19,6 +19,7 @@ DJANGO_SUPERUSER_PASSWORD=admin
 CELERY_BROKER_REDIS_URL=redis://localhost:6379
 CELERY_RESULT_BACKEND=redis://localhost:6379
 
+HOST=127.0.0.1:8000
 
 ### Performing commits
 
@@ -44,3 +45,22 @@ CELERY_RESULT_BACKEND=redis://localhost:6379
 4. To delete task from the queue
     celery -A config purge
 
+
+###Running service locally.
+1. If the service is run with development server and used locally, be sure
+   that HOST value in .env file is equal to 127.0.0.1:8000 (or other values
+   of host and port, which you use running dev server).
+2. Using docker-compose HOST must be 127.0.0.1:8000 (gunicorn will be run on that host
+   and port).
+3. In case of empty value public ip will be used.
+4. In development domain name must be used there.
+
+
+### Project installation steps with docker locally
+
+1. Clone project.
+2. Create venv.
+3. Create .env file with info descripted earlier in this file.
+4. Run command 
+    docker-compose up
+5. Try app with domain http://127.0.0.1:8000
