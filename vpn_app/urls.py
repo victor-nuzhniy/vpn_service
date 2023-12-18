@@ -17,7 +17,7 @@ from vpn_app.views import (
 app_name = "vpn"
 
 urlpatterns = [
-    path("", IndexView.as_view(), name="vpn"),
+    path("", IndexView.as_view(), name="index"),
     path("sign-up/", RegisterView.as_view(), name="sign_up"),
     path("sign-in/", CustomLoginView.as_view(), name="sign_in"),
     path(
