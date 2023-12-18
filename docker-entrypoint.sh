@@ -9,6 +9,11 @@ while ! python manage.py migrate 2>&1; do
   echo "Migration is in progress status."
   sleep 3
 done
+echo "Run collectstatic command."
+while ! python manage.py collectstatic --noinput 2>&1; do
+  echo "Collectstatic in progress."
+  sleep 3
+done
 echo "Create superuser if it had not been created earlier."
 while ! python manage.py init_create_superuser 2>&1; do
   echo "Create initial superuser, if it had not been created earlier."
