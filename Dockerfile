@@ -19,9 +19,6 @@ RUN pip install --no-cache-dir poetry
 COPY poetry.lock pyproject.toml ./
 RUN poetry config installer.max-workers 10
 RUN poetry install
-COPY config config/
-COPY vpn_app vpn_app/
-COPY manage.py ./
 COPY --chmod=0755 docker-entrypoint.sh ./
 
 ENTRYPOINT [ "/bin/sh", "docker-entrypoint.sh" ]
