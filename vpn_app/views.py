@@ -8,6 +8,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView, PasswordChangeView
 from django.http import Http404, HttpResponseRedirect
 from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import DeleteView, FormView, TemplateView, UpdateView
 from revproxy.utils import should_stream
 from revproxy.views import ProxyView
@@ -126,6 +128,7 @@ class AccountView(CustomUserPassesTestMixin, ChangeSuccessURLMixin, UpdateView):
         return context
 
 
+@method_decorator(csrf_exempt, name="dispatch")
 class VpnProxyView(ProxyView):
     """Proxy view."""
 
