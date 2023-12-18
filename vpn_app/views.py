@@ -179,12 +179,9 @@ class VpnProxyView(ProxyView):
         """Add functionality to method."""
         response = super()._created_proxy_response(request, path)
         self._set_content_type(request, response)
-        content_length = response.headers.get("content-length", 0)
-        content_length_uppper = response.headers.get("Content-Length", 0)
-        if content_length or content_length_uppper:
-            add_sended_volume.delay(
-                request.user.id, self.domain, content_length, content_length_uppper
-            )
+        content_length = response.headers.get("Content-Length", 0)
+        if content_length:
+            add_sended_volume.delay(request.user.id, self.domain, content_length)
         if not should_stream(response):
             xsoup = bs4.BeautifulSoup(response.data or b"", "html.parser")
             for elem in xsoup.find_all(
