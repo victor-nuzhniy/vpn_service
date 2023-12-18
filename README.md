@@ -8,6 +8,12 @@ environment variables required by application (data below for an expample).
 
 SECRET_KEY = 'django-insecure-*t(q3ay=og&+4k4dga_-b-+zj%*!ev!lo%s5x&^&!rie5x@ue^'
 
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=vpn
+
 ALLOWED_HOSTS=localhost 127.0.0.1
 
 DEBUG=1
@@ -64,3 +70,7 @@ HOST=127.0.0.1:8000
 4. Run command 
     docker-compose up
 5. Try app with domain http://127.0.0.1:8000
+6. localhost in redis .env statements should be replaced with container ip
+   (172.18.0.2 or 172.18.0.3, can be got with command
+    docker inspect \
+  -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' container_name_or_id)
