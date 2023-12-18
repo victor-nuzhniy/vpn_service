@@ -67,9 +67,9 @@ HOST=127.0.0.1:8000
 1. Clone project.
 2. Create .env file with info descripted earlier in this file.
 3. Run command 
-    docker-compose up
-4. Try app with domain http://127.0.0.1:8000
-5. localhost in redis .env statements should be replaced with container ip
+    docker-compose up redis
+4. localhost in redis .env statements should be replaced with container ip
    (172.18.0.2 or 172.18.0.3, can be got with command
-    docker inspect \
-  -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' container_name_or_id)
+    docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' container_name_or_id)
+5. Run command docker-compose up (you can use second terminal)
+6. Try app with domain http://127.0.0.1:8000
