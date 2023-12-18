@@ -41,6 +41,7 @@
                             <tr>
                                 <th scope="col">N</th>
                                 <th scope="col">Site name</th>
+                                <th scope="col">Site scheme</th>
                                 <th scope="col">Site domain</th>
                                 <th scope="col">Transition</th>
                                 <th scope="col">Sended</th>
@@ -55,6 +56,7 @@
                                     <tr>
                                         <th scope="row">{{ index }}</th>
                                         <th><a href="/localhost/{{ vpn_site.domain }}/">{{ vpn_site.name }}</a></th>
+                                        <th><a href="/localhost/{{ vpn_site.domain }}/">{{ vpn_site.scheme }}</a></th>
                                         <th><a href="/localhost/{{ vpn_site.domain }}/">{{ vpn_site.domain }}</a></th>
                                         <th>{{ vpn_site.used_links_number }}</th>
                                         <th>{{ vpn_site.sended_volume }}</th>
