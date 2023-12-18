@@ -21,12 +21,8 @@ from vpn_app.forms import (
 )
 from vpn_app.mixins import ChangeSuccessURLMixin, CustomUserPassesTestMixin
 from vpn_app.models import VpnSite
-from vpn_app.utils import (
-    add_links_number,
-    add_loaded_volume,
-    add_sended_volume,
-    find_sample_without_word,
-)
+from vpn_app.tasks import add_links_number, add_loaded_volume, add_sended_volume
+from vpn_app.utils import find_sample_without_word
 
 
 class IndexView(TemplateView):
@@ -173,20 +169,21 @@ class VpnProxyView(ProxyView):
         self.upstream = f"{vpn_site.scheme}://{self.domain}"
 
         if self.request.path.startswith("/localhost"):
-            add_links_number(vpn_site)
+            add_links_number.delay(user.id, self.domain)
         if volume := self.request.headers.get("Content-Length", 0):
-            add_loaded_volume(vpn_site, volume)
+            add_loaded_volume.delay(user.id, self.domain, volume)
 
         return path
 
     def _created_proxy_response(self, request, path):
         """Add functionality to method."""
         response = super()._created_proxy_response(request, path)
+        self._set_content_type(request, response)
         content_length = response.headers.get("content-length", 0)
         content_length_uppper = response.headers.get("Content-Length", 0)
         if content_length or content_length_uppper:
-            add_sended_volume(
-                request.user, self.domain, content_length, content_length_uppper
+            add_sended_volume.delay(
+                request.user.id, self.domain, content_length, content_length_uppper
             )
         if not should_stream(response):
             xsoup = bs4.BeautifulSoup(response.data or b"", "html.parser")
