@@ -129,6 +129,8 @@ class AccountView(CustomUserPassesTestMixin, ChangeSuccessURLMixin, UpdateView):
 class VpnProxyView(ProxyView):
     """Proxy view."""
 
+    retries = 2
+
     def __init__(self, *args, **kwargs):
         """Rewrite __init__ method, add 'domain' attr."""
         self.domain: Optional[str] = None
@@ -136,8 +138,8 @@ class VpnProxyView(ProxyView):
 
     def get_quoted_path(self, path) -> str:
         """Rewrite get_quoted_path method, hook for perform_additional_operations."""
-        path = self.perform_additional_operations(path)
-        return super().get_quoted_path(path)
+        path = super().get_quoted_path(path)
+        return self.perform_additional_operations(path)
 
     def perform_additional_operations(self, path) -> str:
         """
@@ -151,10 +153,14 @@ class VpnProxyView(ProxyView):
         Return path (modified or not).
         """
         user = self.request.user
-        if self.request.path.startswith("/localhost"):
+        if self.request.path.startswith("/localhost") or self.request.path.startswith(
+            "localhost"
+        ):
+            path_list = self.request.path.split("localhost")
+            path = path_list[-1]
             path_list = path.split("/")
-            self.domain = path_list[0]
-            path = "/".join(path_list[1:])
+            self.domain = path_list[1]
+            path = "/".join(path_list[2:])
         else:
             self.domain = self.request.COOKIES.get("user_domain")
         if not self.domain or user.is_anonymous:
@@ -167,7 +173,6 @@ class VpnProxyView(ProxyView):
             raise Http404
 
         self.upstream = f"{vpn_site.scheme}://{self.domain}"
-
         if self.request.path.startswith("/localhost"):
             add_links_number.delay(user.id, self.domain)
         if volume := self.request.headers.get("Content-Length", 0):
@@ -184,10 +189,21 @@ class VpnProxyView(ProxyView):
             add_sended_volume.delay(request.user.id, self.domain, content_length)
         if not should_stream(response):
             xsoup = bs4.BeautifulSoup(response.data or b"", "html.parser")
+            host = request.META["HOST"]
             for elem in xsoup.find_all(
-                "a", href=lambda x: find_sample_without_word(x, "http")
+                "a",
+                href=lambda x: find_sample_without_word(
+                    x, "http", "localhost", "#", "mailto", "tel:"
+                ),
             ):
-                elem["href"] = f"localhost/{self.domain}/{elem['href']}"
+                if elem["href"].startswith("/"):
+                    elem[
+                        "href"
+                    ] = f"http://{host}/localhost/{self.domain}/{elem['href'][1:]}"
+                else:
+                    elem[
+                        "href"
+                    ] = f"http://{host}/localhost/{self.domain}/{elem['href']}"
             response._body = xsoup.prettify()
         return response
 
