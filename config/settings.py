@@ -134,3 +134,7 @@ SESSION_COOKIE_NAME = "modsessionid"
 CSRF_COOKIE_NAME = "modcsrftoken"
 
 APPEND_SLASH = False
+
+CELERY_BROKER_URL = str(os.getenv("CELERY_BROKER_REDIS_URL"))
+
+CELERY_RESULT_BACKEND = str(os.getenv("CELERY_RESULT_BACKEND"))
