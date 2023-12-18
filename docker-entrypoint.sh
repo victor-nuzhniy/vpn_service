@@ -16,5 +16,5 @@ while ! python manage.py init_create_superuser 2>&1; do
 done
 echo "Django docker is fully configured successfully."
 gunicorn -b unix:/gunicorn_socket/config config.wsgi --workers 3 --bind 0.0.0.0:8000 &
-celery -A config worker -l
+celery -A config worker --loglevel=INFO
 exec "$@"
