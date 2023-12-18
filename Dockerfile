@@ -10,7 +10,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     POETRY_HOME='/usr/src/app'
 
 RUN apk add --update --no-cache --virtual .tmp-build-deps \
-    gcc libc-dev linux-headers \
+    gcc libc-dev linux-headers postgresql-dev \
     && apk add libffi-dev
 
 RUN pip install --no-cache-dir poetry
