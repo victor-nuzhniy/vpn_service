@@ -22,7 +22,7 @@ from vpn_app.forms import (
 from vpn_app.mixins import ChangeSuccessURLMixin, CustomUserPassesTestMixin
 from vpn_app.models import VpnSite
 from vpn_app.tasks import add_links_number, add_loaded_volume, add_sended_volume
-from vpn_app.utils import find_sample_without_word
+from vpn_app.utils import Config, find_sample_without_word
 
 
 class IndexView(TemplateView):
@@ -189,7 +189,7 @@ class VpnProxyView(ProxyView):
             add_sended_volume.delay(request.user.id, self.domain, content_length)
         if not should_stream(response):
             xsoup = bs4.BeautifulSoup(response.data or b"", "html.parser")
-            host = request.META["HOST"]
+            host = Config().public_ip
             for elem in xsoup.find_all(
                 "a",
                 href=lambda x: find_sample_without_word(
