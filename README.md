@@ -65,12 +65,11 @@ HOST=127.0.0.1:8000
 ### Project installation steps with docker locally
 
 1. Clone project.
-2. Create venv.
-3. Create .env file with info descripted earlier in this file.
-4. Run command 
+2. Create .env file with info descripted earlier in this file.
+3. Run command 
     docker-compose up
-5. Try app with domain http://127.0.0.1:8000
-6. localhost in redis .env statements should be replaced with container ip
+4. Try app with domain http://127.0.0.1:8000
+5. localhost in redis .env statements should be replaced with container ip
    (172.18.0.2 or 172.18.0.3, can be got with command
     docker inspect \
   -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' container_name_or_id)
