@@ -25,8 +25,6 @@ DJANGO_SUPERUSER_PASSWORD=admin
 CELERY_BROKER_REDIS_URL=redis://vpn_service-redis-1:6379
 CELERY_RESULT_BACKEND=redis://vpn_service-redis-1:6379
 
-HOST=127.0.0.1
-
 ### Performing commits
 
 1. Pre-commit hook installed, settings are in .pre-commit-config.yaml
@@ -53,14 +51,9 @@ HOST=127.0.0.1
 
 
 ###Running service locally.
-1. If the service is run with development server and used locally, be sure
-   that HOST value in .env file is equal to 127.0.0.1:8000 (or other values
-   of host and port, which you use running dev server).
-2. Using docker-compose HOST must be 127.0.0.1:8000 (gunicorn will be run on that host
-   and port).
-3. In case of empty value public ip will be used.
-4. In development domain name in .env must be used there.
-5. Running with virtual env postgres host and port should be changed with localhost
+1. Using docker-compose HOST can be 127.0.0.1:8000 (gunicorn will be run on that host
+   and port) or 127.0.0.1 - nginx is configured that way.
+2. Running with virtual env postgres host and port should be changed with localhost
    and 8778 respectfully, celery .env host settings should be changed to localhost.
 
 
