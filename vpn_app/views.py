@@ -24,7 +24,7 @@ from vpn_app.forms import (
 from vpn_app.mixins import ChangeSuccessURLMixin, CustomUserPassesTestMixin
 from vpn_app.models import VpnSite
 from vpn_app.tasks import add_links_number, add_loaded_volume, add_sended_volume
-from vpn_app.utils import Config, find_sample, find_sample_without_word
+from vpn_app.utils import Config, find_sample_without_word
 
 
 class IndexView(TemplateView):
@@ -206,13 +206,16 @@ class VpnProxyView(ProxyView):
                     elem[
                         "href"
                     ] = f"http://{host}/localhost/{self.domain}/{elem['href']}"
-            for elem in xsoup.find_all(
-                "a",
-                href=lambda x: find_sample(
-                    x, self.domain, "http", host=host, localhost="localhost"
-                ),
-            ):
-                print(elem["href"])
+            find_links_tag = xsoup.find("script", atr="find-links")
+            if not find_links_tag:
+                with open(
+                    "vpn_app/admin_static_files/vpn_app/js/find_link.js", "r"
+                ) as f:
+                    file_content = f.read()
+                body = xsoup.find("body")
+                find_links_tag = xsoup.new_tag("script", atr="find-links")
+                find_links_tag.append(file_content)
+                body.append(find_links_tag)
             response._body = xsoup.prettify()
         return response
 
