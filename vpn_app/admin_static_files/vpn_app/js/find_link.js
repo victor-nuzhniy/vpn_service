@@ -15,6 +15,17 @@ function changeLinks(){
             link.href = "http://" + location.host + "/localhost" + link.href
         };
     };
+    forms = document.getElementsByTagName("form")
+    for(const form in forms){
+        if(Boolean(form.action)){
+            if(form.action.includes("http") && !form.action.includes("localhost") && form.action.includes(domain)){
+                const formList = form.action.split("//");
+                form.action = "http://" + location.host + "/localhost/" + formList[1]
+            } else if(!form.action.includes("http")){
+                form.action = "http://" + location.host + "/localhost" + form.action
+            };
+        };
+    };
 };
 changeLinks()
 function getCookie(name) {
