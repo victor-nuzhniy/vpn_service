@@ -6,7 +6,7 @@
 1. Create in the project root (or obtain from team member) an `.env` file with 
 environment variables required by application (data below for an expample). 
 
-SECRET_KEY = 'django-insecure-*t(q3ay=og&+4k4dga_-b-+zj%*!ev!lo%s5x&^&!rie5x@ue^'
+SECRET_KEY = 'django-insecure-*t(q3ay=og&+4k4dga_-b-+zj%*!ev!lo%s5x&^&!rie5x@ue'
 
 POSTGRES_HOST=postgres
 POSTGRES_PORT=5432
@@ -22,10 +22,10 @@ DJANGO_SUPERUSER_USERNAME=admin
 DJANGO_SUPERUSER_EMAIL=a@a.com
 DJANGO_SUPERUSER_PASSWORD=admin
 
-CELERY_BROKER_REDIS_URL=redis://localhost:6379
-CELERY_RESULT_BACKEND=redis://localhost:6379
+CELERY_BROKER_REDIS_URL=redis://vpn_service-redis-1:6379
+CELERY_RESULT_BACKEND=redis://vpn_service-redis-1:6379
 
-HOST=127.0.0.1:8000
+HOST=127.0.0.1
 
 ### Performing commits
 
@@ -59,7 +59,9 @@ HOST=127.0.0.1:8000
 2. Using docker-compose HOST must be 127.0.0.1:8000 (gunicorn will be run on that host
    and port).
 3. In case of empty value public ip will be used.
-4. In development domain name must be used there.
+4. In development domain name in .env must be used there.
+5. Running with virtual env postgres host and port should be changed with localhost
+   and 8778 respectfully, celery .env host settings should be changed to localhost.
 
 
 ### Project installation steps with docker locally
@@ -68,8 +70,9 @@ HOST=127.0.0.1:8000
 2. Create .env file with info descripted earlier in this file.
 3. Run command 
     docker-compose up redis
-4. localhost in redis .env statements should be replaced with container ip
-   (172.18.0.2 or 172.18.0.3, can be got with command
+4. Host in redis .env statements should be checked and setted with container ip or name
+   (172.18.0.2 or 172.18.0.3 can be got with command
     docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' container_name_or_id)
+    or can be used name (for example - vpn_service-redis-1 - depends on the system)
 5. Run command docker-compose up (you can use second terminal)
-6. Try app with domain http://127.0.0.1:8000
+6. Try app with domain http://127.0.0.1

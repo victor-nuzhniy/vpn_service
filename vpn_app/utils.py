@@ -32,9 +32,13 @@ class Config:
         return urlopen("https://ident.me").read().decode("utf8")
 
 
-def find_sample(sample, word) -> bool:
+def find_sample(sample, *words, **kwords) -> bool:
     """Define if sample satisfy the case."""
-    return sample and re.compile(word).search(sample)
+    return (
+        sample
+        and all([re.compile(word).search(sample) for word in words])
+        and all([re.compile(word).search(sample) for word in kwords.values()])
+    )
 
 
 def find_sample_without_word(sample, *words) -> bool:

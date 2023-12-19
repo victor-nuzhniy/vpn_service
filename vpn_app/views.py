@@ -1,5 +1,4 @@
 """Views for vpn_app."""
-import logging
 from typing import Dict, Optional
 
 import bs4
@@ -181,7 +180,6 @@ class VpnProxyView(ProxyView):
             add_links_number.delay(user.id, self.domain)
         if volume := self.request.headers.get("Content-Length", 0):
             add_loaded_volume.delay(user.id, self.domain, volume)
-        logging.info(f"{self.request.path} {path} 2222222222222222")
         return path
 
     def _created_proxy_response(self, request, path):
@@ -208,12 +206,22 @@ class VpnProxyView(ProxyView):
                     elem[
                         "href"
                     ] = f"http://{host}/localhost/{self.domain}/{elem['href']}"
+            find_links_tag = xsoup.find("script", atr="find-links")
+            if not find_links_tag:
+                with open(
+                    "vpn_app/admin_static_files/vpn_app/js/find_link.js", "r"
+                ) as f:
+                    file_content = f.read()
+                body = xsoup.find("body")
+                if body:
+                    find_links_tag = xsoup.new_tag("script", atr="find-links")
+                    find_links_tag.append(file_content)
+                    body.append(find_links_tag)
             response._body = xsoup.prettify()
         return response
 
     def dispatch(self, request, path):
         """Rewrite dispatch method. Add 'user_domain' cookie."""
-        logging.info(f"{request.path} {path} 111111111111111")
         response = super().dispatch(request, path)
         response.set_cookie(key="user_domain", value=self.domain)
         return response
