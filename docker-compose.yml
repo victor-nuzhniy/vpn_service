@@ -35,7 +35,7 @@ services:
       - "80"
       - "443"
     volumes:
-      # nginx needs to access static files
+      # nginx needs to access admin_static_files files
       - ./nginx/conf.d/:/etc/nginx/conf.d/
       - ./admin_static_files:/usr/src/app/admin_static_files
       - gunicorn_socket:/gunicorn_socket
