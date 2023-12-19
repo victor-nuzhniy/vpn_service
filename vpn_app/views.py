@@ -1,7 +1,6 @@
 """Views for vpn_app."""
 from typing import Dict, Optional
 
-import bs4
 from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
@@ -24,7 +23,7 @@ from vpn_app.forms import (
 from vpn_app.mixins import ChangeSuccessURLMixin, CustomUserPassesTestMixin
 from vpn_app.models import VpnSite
 from vpn_app.tasks import add_links_number, add_loaded_volume, add_sended_volume
-from vpn_app.utils import find_sample_without_word
+from vpn_app.utils import modify_response
 
 
 class IndexView(TemplateView):
@@ -190,47 +189,7 @@ class VpnProxyView(ProxyView):
         if content_length:
             add_sended_volume.delay(request.user.id, self.domain, content_length)
         if not should_stream(response):
-            xsoup = bs4.BeautifulSoup(response.data or b"", "html.parser")
-            host = request.get_host()
-            for elem in xsoup.find_all(
-                "a",
-                href=lambda x: find_sample_without_word(
-                    x, "http", "localhost", "#", "mailto", "tel:"
-                ),
-            ):
-                if elem["href"].startswith("/"):
-                    elem[
-                        "href"
-                    ] = f"http://{host}/localhost/{self.domain}/{elem['href'][1:]}"
-                else:
-                    elem[
-                        "href"
-                    ] = f"http://{host}/localhost/{self.domain}/{elem['href']}"
-            find_links_tag = xsoup.find("script", atr="find-links")
-            if not find_links_tag:
-                with open(
-                    "vpn_app/admin_static_files/vpn_app/js/find_link.js", "r"
-                ) as f:
-                    file_content = f.read()
-                body = xsoup.find("body")
-                if body:
-                    find_links_tag = xsoup.new_tag("script", atr="find-links")
-                    find_links_tag.append(file_content)
-                    body.append(find_links_tag)
-
-            for elem in xsoup.find_all(
-                "form",
-                action=lambda x: find_sample_without_word(x, "http", "localhost"),
-            ):
-                if elem["action"].startswith("/"):
-                    elem[
-                        "action"
-                    ] = f"http://{host}/localhost/{self.domain}/{elem['action'][1:]}"
-                else:
-                    elem[
-                        "action"
-                    ] = f"http://{host}/localhost/{self.domain}/{elem['action']}"
-            response._body = xsoup.prettify()
+            modify_response(response, request.get_host(), self.domain)
         return response
 
     def _replace_host_on_redirect_location(self, request, proxy_response):
