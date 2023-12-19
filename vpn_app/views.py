@@ -213,9 +213,10 @@ class VpnProxyView(ProxyView):
                 ) as f:
                     file_content = f.read()
                 body = xsoup.find("body")
-                find_links_tag = xsoup.new_tag("script", atr="find-links")
-                find_links_tag.append(file_content)
-                body.append(find_links_tag)
+                if body:
+                    find_links_tag = xsoup.new_tag("script", atr="find-links")
+                    find_links_tag.append(file_content)
+                    body.append(find_links_tag)
             response._body = xsoup.prettify()
         return response
 
