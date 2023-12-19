@@ -24,7 +24,7 @@ from vpn_app.forms import (
 from vpn_app.mixins import ChangeSuccessURLMixin, CustomUserPassesTestMixin
 from vpn_app.models import VpnSite
 from vpn_app.tasks import add_links_number, add_loaded_volume, add_sended_volume
-from vpn_app.utils import Config, find_sample_without_word
+from vpn_app.utils import find_sample_without_word
 
 
 class IndexView(TemplateView):
@@ -191,7 +191,7 @@ class VpnProxyView(ProxyView):
             add_sended_volume.delay(request.user.id, self.domain, content_length)
         if not should_stream(response):
             xsoup = bs4.BeautifulSoup(response.data or b"", "html.parser")
-            host = Config().public_ip
+            host = request.get_host()
             for elem in xsoup.find_all(
                 "a",
                 href=lambda x: find_sample_without_word(
@@ -217,8 +217,44 @@ class VpnProxyView(ProxyView):
                     find_links_tag = xsoup.new_tag("script", atr="find-links")
                     find_links_tag.append(file_content)
                     body.append(find_links_tag)
+
+            for elem in xsoup.find_all(
+                "form",
+                action=lambda x: find_sample_without_word(x, "http", "localhost"),
+            ):
+                if elem["action"].startswith("/"):
+                    elem[
+                        "action"
+                    ] = f"http://{host}/localhost/{self.domain}/{elem['action'][1:]}"
+                else:
+                    elem[
+                        "action"
+                    ] = f"http://{host}/localhost/{self.domain}/{elem['action']}"
             response._body = xsoup.prettify()
         return response
+
+    def _replace_host_on_redirect_location(self, request, proxy_response):
+        """Rewrite method to modify links with given domain name."""
+        super()._replace_host_on_redirect_location(request, proxy_response)
+        location = proxy_response.headers.get("Location")
+        if location:
+            if location:
+                if request.is_secure():
+                    scheme = "https://"
+                else:
+                    scheme = "http://"
+                request_host = scheme + request.get_host() + "/localhost/" + self.domain
+                if location.startswith("http"):
+                    upstream_host_http = "http://" + self._parsed_url.netloc
+                    upstream_host_https = "https://" + self._parsed_url.netloc
+                    location = location.replace(upstream_host_http, request_host)
+                    location = location.replace(upstream_host_https, request_host)
+                else:
+                    location = request_host + location
+                proxy_response.headers["Location"] = location
+                self.log.debug(
+                    "Proxy response LOCATION: %s", proxy_response.headers["Location"]
+                )
 
     def dispatch(self, request, path):
         """Rewrite dispatch method. Add 'user_domain' cookie."""
