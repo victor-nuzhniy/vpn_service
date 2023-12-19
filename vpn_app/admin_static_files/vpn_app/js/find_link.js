@@ -6,7 +6,6 @@ function getCookie(name) {
 
 const domain = getCookie("user_domain")
 function changeLinks(){
-    console.log("changeLinks is launched!")
     links = document.getElementsByTagName("a");
     for(const link of links){
         if(link.href.includes("http") && !link.href.includes("localhost") && link.href.includes(domain)){
