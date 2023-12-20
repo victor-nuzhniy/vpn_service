@@ -26,20 +26,6 @@ function changeLinks(){
             };
         };
     };
-    scripts = document.getElementsByTagName("script")
-    for(const script of scripts){
-        if(Boolean(script.src)){
-            if(script.src.includes("http") && !script.src.includes("localhost") && script.src.includes(domain)){
-                const scriptList=script.src.split("//");
-                script.src = "http://" + location.host + "/localhost/" + scriptList[1]
-            } else if(!script.src.includes("http")) {
-                script.src = "http://" + location.host + "/localhost" + + domain + script.src
-            } else if(script.src.includes("http") && !script.src.includes("localhost") && script.src.includes(location.host)){
-                const scriptList = script.src.split(location.host);
-                script.src = "http://" + location.host + "/localhost/" + domain + scriptList[1]
-            };
-        };
-    };
 };
 changeLinks()
 function getCookie(name) {
