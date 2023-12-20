@@ -12,7 +12,7 @@ function changeLinks(){
             const linkList = link.href.split("//")
             link.href = "http://" + location.host + "/localhost/" + linkList[1]
         } else if(!link.href.includes("http")){
-            link.href = "http://" + location.host + "/localhost" + link.href
+            link.href = "http://" + location.host + "/localhost/" + domain + link.href
         };
     };
     forms = document.getElementsByTagName("form")
@@ -22,7 +22,21 @@ function changeLinks(){
                 const formList = form.action.split("//");
                 form.action = "http://" + location.host + "/localhost/" + formList[1]
             } else if(!form.action.includes("http")){
-                form.action = "http://" + location.host + "/localhost" + form.action
+                form.action = "http://" + location.host + "/localhost/" + domain + form.action
+            };
+        };
+    };
+    scripts = document.getElementsByTagName("script")
+    for(const script of scripts){
+        if(Boolean(script.src)){
+            if(script.src.includes("http") && !script.src.includes("localhost") && script.src.includes(domain)){
+                const scriptList=script.src.split("//");
+                script.src = "http://" + location.host + "/localhost/" + scriptList[1]
+            } else if(!script.src.includes("http")) {
+                script.src = "http://" + location.host + "/localhost" + + domain + script.src
+            } else if(script.src.includes("http") && !script.src.includes("localhost") && script.src.includes(location.host)){
+                const scriptList = script.src.split(location.host);
+                script.src = "http://" + location.host + "/localhost/" + domain + scriptList[1]
             };
         };
     };
@@ -34,12 +48,22 @@ function getCookie(name) {
   if (parts.length === 2) return parts.pop().split(';').shift();
 }
 
-MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+const body = document.getElementsByTagName("body");
 
-var observer = new MutationObserver(function(mutations, observer) {
-    changeLinks()
-});
+const config = { attributes: true, childList: true, subtree: true };
 
-observer.observe(document, {
-  childList: true
-});
+const callback = (mutationList, observer) => {
+  for (const mutation of mutationList) {
+    if (mutation.type === "childList") {
+      changeLinks();
+    };
+  };
+};
+
+const observer = new MutationObserver(callback);
+
+if(Boolean(body)){
+    const config = {childList: true};
+    observer.observe(body[0], config);
+    observer.disconnect();
+}
