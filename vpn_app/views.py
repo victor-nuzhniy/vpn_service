@@ -176,7 +176,10 @@ class VpnProxyView(ProxyView):
             raise Http404
 
         self.upstream = f"{vpn_site.scheme}://{self.domain}"
-        if self.request.path.startswith("/localhost"):
+        if (
+            self.request.headers.get("Sec-Fetch-Dest") == "document"
+            and self.request.headers.get("Sec-Fetch-Mode") == "navigate"
+        ):
             add_links_number.delay(user.id, self.domain)
         if volume := self.request.headers.get("Content-Length", 0):
             add_loaded_volume.delay(user.id, self.domain, volume)
