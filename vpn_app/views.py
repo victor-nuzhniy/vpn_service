@@ -132,6 +132,7 @@ class VpnProxyView(ProxyView):
     """Proxy view."""
 
     retries = 2
+    add_x_forwarded = True
 
     def __init__(self, *args, **kwargs):
         """Rewrite __init__ method, add 'domain' attr."""
