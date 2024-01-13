@@ -1,6 +1,4 @@
 """Module for celery instance for 'top_api' project."""
-from __future__ import absolute_import, unicode_literals
-
 import os
 
 from celery import Celery
