@@ -3,12 +3,14 @@ import os
 
 from celery import Celery
 
+from config import settings
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 
 app = Celery(
     "config",
-    broker="redis://localhost:6379",
-    backend="redis://localhost:6379",
+    broker=settings.CELERY_BROKER_URL,
+    backend=settings.CELERY_RESULT_BACKEND,
     include=["vpn_app.tasks"],
 )
 
