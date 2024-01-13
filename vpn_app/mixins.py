@@ -1,21 +1,28 @@
 """Mixins for vpn_app views."""
+import typing
 from abc import ABC
 
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.urls import reverse_lazy
+from django.views.generic import FormView
+
+if typing.TYPE_CHECKING:
+    _Base = FormView
+else:
+    _Base = object
 
 
-class ChangeSuccessURLMixin:
+class ChangeSuccessURLMixin(_Base):
     """Rewrite get_success_url method."""
 
-    def get_success_url(self):
+    def get_success_url(self) -> str:
         """Get success url for redirect."""
         if self.request.user.is_anonymous:
             return super().get_success_url()
         return reverse_lazy("vpn:account", kwargs={"pk": self.request.user.id})
 
 
-class CustomUserPassesTestMixin(UserPassesTestMixin, ABC):
+class CustomUserPassesTestMixin(UserPassesTestMixin, _Base, ABC):
     """Customize UserPassesTestMixin, add test_func method."""
 
     def test_func(self) -> bool:
@@ -23,4 +30,4 @@ class CustomUserPassesTestMixin(UserPassesTestMixin, ABC):
         if self.request.user.is_anonymous:
             return False
         pk = self.request.user.pk
-        return pk == self.kwargs.get("owner_id") or pk == self.kwargs.get("pk")
+        return pk in {self.kwargs.get("owner_id"), self.kwargs.get("pk")}
