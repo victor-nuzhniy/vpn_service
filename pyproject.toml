@@ -28,6 +28,9 @@ flake8-docstrings = "^1.7.0"
 xenon = "^0.9.1"
 isort = "^5.13.1"
 pre-commit = "^3.6.0"
+mypy = "^1.8.0"
+django-stubs = "^4.2.7"
+wemake-python-styleguide = "^0.18.0"
 
 
 [tool.poetry.group.test]
