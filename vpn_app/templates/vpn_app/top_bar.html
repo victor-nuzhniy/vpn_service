@@ -7,12 +7,12 @@
     <a href="{% url 'vpn:index'%}" class="fs-3 fw-bold text-danger">VPN</a>
     {% if user.is_anonymous %}
         <div class="d-flex flex-row">
-            <a class="m-2 text-danger" href="{% url 'vpn:sign_up' %}">Sign up</a>
-            <a class="m-2 text-danger" href="{% url 'vpn:sign_in' %}">Sign in</a>
+            <a class="m-2 text-danger" href="{% url 'auth:sign_up' %}">Sign up</a>
+            <a class="m-2 text-danger" href="{% url 'auth:sign_in' %}">Sign in</a>
         </div>
     {% else %}
         <div class="d-flex flex-row aling-items-center">
-            <form class="d-flex flex-row align-items-center" action="{% url 'vpn:logout' %}" method="post">
+            <form class="d-flex flex-row align-items-center" action="{% url 'auth:logout' %}" method="post">
                 {% csrf_token %}
                 <input
                         class="text-danger border border-0 bg-transparent"
