@@ -42,6 +42,7 @@ INSTALLED_APPS = (
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "vpn_app.apps.VpnAppConfig",
+    "auth_app.apps.AuthAppConfig",
 )
 
 MIDDLEWARE = (
