@@ -3,6 +3,7 @@ import typing
 from abc import ABC
 
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.http import HttpRequest
 from django.urls import reverse_lazy
 from django.views.generic import FormView
 
@@ -22,10 +23,22 @@ class ChangeSuccessURLMixin(_Base):
         return reverse_lazy("vpn:account", kwargs={"pk": self.request.user.id})
 
 
-class CustomUserPassesTestMixin(UserPassesTestMixin, _Base, ABC):
+class RequestAttribute(typing.Protocol):
+    """Class with request and kwargs properties."""
+
+    @property
+    def request(self) -> HttpRequest:
+        """Request attr."""
+
+    @property
+    def kwargs(self) -> dict:
+        """Kwargs attr."""
+
+
+class CustomUserPassesTestMixin(UserPassesTestMixin, ABC):
     """Customize UserPassesTestMixin, add test_func method."""
 
-    def test_func(self) -> bool:
+    def test_func(self: RequestAttribute) -> bool:
         """Test whether user is user."""
         if self.request.user.is_anonymous:
             return False
