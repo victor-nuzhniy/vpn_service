@@ -21,6 +21,6 @@ from django.urls import include, path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", include("vpn_app.urls")),
     path("auth/", include("auth_app.urls")),
+    path("", include("vpn_app.urls")),
 ]
