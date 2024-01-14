@@ -89,6 +89,13 @@ class BaseVpnProxyView(ProxyView):
                 request.get_host(),
                 self.domain,
             ).modify_response()
+        set_cookie: str = response.headers.get('Set-Cookie')
+        if set_cookie:
+            new_cookie = ""
+            for cookie in set_cookie.split("; "):
+                if not cookie.startswith("Max-Age"):
+                    new_cookie += cookie
+            response.headers["Set-Cookie"] = new_cookie
         return response
 
     def _replace_host_on_redirect_location(
