@@ -1,54 +1,50 @@
 version: '3.7'
 
 services:
-  postgres:
-    image: 'postgres:latest'
-    container_name: "postgres"
+  postgres_vpn:
+    image: 'postgres:16-alpine3.19'
+    container_name: "postgres_vpn"
     env_file:
       - .env  # must define POSTGRES_USER, POSTGRES_PASSWORD and POSTGRES_DB
     volumes:
       - database_data:/var/lib/postgresql/data/  # persist data
     ports:
       - '8778:5432'  # required to access DB from host system
-  web:
+  redis_vpn:
+    image: redis:5
+    container_name: 'redis_vpn'
+    volumes:
+      - redis_data:/data
+    ports:
+      - '6379:6379'
+  web_vpn:
     build:
       context: .
+    container_name: 'web_vpn'
     volumes:
       - ./:/usr/src/app
-      - gunicorn_socket:/gunicorn_socket
-    ports:
-      - '8000:8000'
     expose:
       - 8000
     env_file:
       - .env
     depends_on:
-      - postgres
-  nginx:
+      - postgres_vpn
+      - redis_vpn
+  nginx_vpn:
     build:
       context: ./nginx/
+    container_name: 'nginx_vpn'
     restart: always
     ports:
       - "80:80"
       - "443:443"
-    expose:
-      - "80"
-      - "443"
     volumes:
       # nginx needs to access admin_static_files files
       - ./nginx/conf.d/:/etc/nginx/conf.d/
       - ./admin_static_files:/usr/src/app/admin_static_files
-      - gunicorn_socket:/gunicorn_socket
     depends_on:
-      - web
-  redis:
-    image: redis:5
-    volumes:
-      - redis_data:/data
-    ports:
-      - '6379:6379'
+      - web_vpn
 
 volumes:
   database_data:
-  gunicorn_socket:
   redis_data:
