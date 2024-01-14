@@ -1,15 +1,11 @@
 """Urls for vpn_app."""
-from django.contrib.auth.views import LogoutView
 from django.urls import path, re_path
 
 from vpn_app.views import (
     AccountView,
     CreateSiteLinkView,
-    CustomLoginView,
-    CustomPasswordChangeView,
     DeleteSiteLinkView,
     IndexView,
-    RegisterView,
     UpdateSiteLinkView,
     VpnProxyView,
 )
@@ -18,12 +14,6 @@ app_name = "vpn"
 
 urlpatterns = [
     path("", IndexView.as_view(), name="index"),
-    path("sign-up/", RegisterView.as_view(), name="sign_up"),
-    path("sign-in/", CustomLoginView.as_view(), name="sign_in"),
-    path(
-        "password-change/", CustomPasswordChangeView.as_view(), name="password_change"
-    ),
-    path("logout/", LogoutView.as_view(next_page="vpn:index"), name="logout"),
     path("create-site-link/", CreateSiteLinkView.as_view(), name="create_site_link"),
     path(
         "update-site-link/<int:owner_id>/<str:slug>/",
@@ -37,9 +27,9 @@ urlpatterns = [
     ),
     path("account/<int:pk>/", AccountView.as_view(), name="account"),
     re_path(
-        r"^localhost/(?P<path>([^/]+/?)*)$",
+        r"^localhost/(?P<path>([^/]+/?)*)$",  # noqa WPS360
         VpnProxyView.as_view(),
         name="vpn_local_view",
     ),
-    re_path(r"(?P<path>.*)", VpnProxyView.as_view(), name="vpn_view"),
+    re_path(r"(?P<path>.*)", VpnProxyView.as_view(), name="vpn_view"),  # noqa WPS360
 ]
