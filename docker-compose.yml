@@ -23,8 +23,7 @@ services:
     container_name: 'web_vpn'
     volumes:
       - ./:/usr/src/app
-    expose:
-      - 8000
+      - gunicorn_socket:/gunicorn_socket
     env_file:
       - .env
     depends_on:
@@ -42,9 +41,11 @@ services:
       # nginx needs to access admin_static_files files
       - ./nginx/conf.d/:/etc/nginx/conf.d/
       - ./admin_static_files:/usr/src/app/admin_static_files
+      - gunicorn_socket:/gunicorn_socket
     depends_on:
       - web_vpn
 
 volumes:
   database_data:
   redis_data:
+  gunicorn_socket:
