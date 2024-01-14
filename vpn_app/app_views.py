@@ -2,6 +2,8 @@
 import typing
 
 from django.http import Http404, HttpRequest, HttpResponseBase
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from revproxy.utils import should_stream
 from revproxy.views import ProxyView
 
@@ -10,6 +12,7 @@ from vpn_app.app_services import ResponseDataModifier
 from vpn_app.models import VpnSite
 
 
+@method_decorator(csrf_exempt, name="dispatch")
 class BaseVpnProxyView(ProxyView):
     """Proxy view."""
 
