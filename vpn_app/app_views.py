@@ -2,8 +2,6 @@
 import typing
 
 from django.http import Http404, HttpRequest, HttpResponseBase
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from revproxy.utils import should_stream
 from revproxy.views import ProxyView
 
@@ -12,7 +10,6 @@ from vpn_app.app_services import ResponseDataModifier
 from vpn_app.models import VpnSite
 
 
-@method_decorator(csrf_exempt, name="dispatch")
 class BaseVpnProxyView(ProxyView):
     """Proxy view."""
 
@@ -107,30 +104,29 @@ class BaseVpnProxyView(ProxyView):
         super()._replace_host_on_redirect_location(request, proxy_response)
         location = proxy_response.headers.get("Location")
         if location:
-            if location:
-                if request.is_secure():
-                    scheme = "https://"
-                else:
-                    scheme = "http://"
-                request_host = "{scheme}{host}/localhost/{domain}".format(
-                    scheme=scheme,
-                    host=request.get_host(),
-                    domain=self.domain,
+            if request.is_secure():
+                scheme = "https://"
+            else:
+                scheme = "http://"
+            request_host = "{scheme}{host}/localhost/{domain}".format(
+                scheme=scheme,
+                host=request.get_host(),
+                domain=self.domain,
+            )
+            if location.startswith("http"):
+                upstream_host_http = "http://{host}".format(
+                    host=self._parsed_url.netloc,
                 )
-                if location.startswith("http"):
-                    upstream_host_http = "http://{host}".format(
-                        host=self._parsed_url.netloc,
-                    )
-                    upstream_host_https = "https://{host}".format(
-                        host=self._parsed_url.netloc,
-                    )
-                    location = location.replace(upstream_host_http, request_host)
-                    location = location.replace(upstream_host_https, request_host)
-                else:
-                    location = request_host + location
-                proxy_response.headers["Location"] = location
-                self.log.debug(
-                    "Proxy response LOCATION: {header}".format(
-                        header=proxy_response.headers["Location"],
-                    ),
+                upstream_host_https = "https://{host}".format(
+                    host=self._parsed_url.netloc,
                 )
+                location = location.replace(upstream_host_http, request_host)
+                location = location.replace(upstream_host_https, request_host)
+            else:
+                location = request_host + location
+            proxy_response.headers["Location"] = location
+            self.log.debug(
+                "Proxy response LOCATION: {header}".format(
+                    header=proxy_response.headers["Location"],
+                ),
+            )
